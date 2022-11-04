@@ -3,6 +3,14 @@
 Docker Volume Backup is a simple tool to backup and restore Docker volumes for containers and composes.
 It requires no access to docker-compose file, and is compatible with Portainer and Docker Compose.
 
+## Installation
+
+### Install with pip
+
+```bash
+pip3 install -r requirements.txt
+```
+
 ## Usage
 
 ### Backup

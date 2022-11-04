@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 import os
 import sys
@@ -66,20 +66,16 @@ def restore_volumes(backup_dir):
             os.system("docker run --rm -v {}:/volume -v {}:/backup ubuntu tar xvfz /backup/{}.tar.gz".format(volume_name, backup_dir, volume_name))
 
 def generate_backup_checksums(volumes, backup_dir):
+    files = []
     for v in volumes:
-        v_backup = os.path.join(backup_dir, "{}.tar.gz".format(v.name))
-        if os.path.isfile(v_backup):
-            os.system("sha256sum {} > {}.sha256".format(v_backup, v_backup))
+        files.append(os.path.join(backup_dir, "{}.tar.gz".format(v.name)))
+    os.system("sha256sum {} > {}".format(" ".join(files), os.path.join(backup_dir, "checksums.sha256")))
 
 def verify_backup_checksums(backup_dir):
-    for f in os.listdir(backup_dir):
-        if f.endswith(".tar.gz"):
-            volume_name = f.replace(".tar.gz", "")
-            print("Verifying volume {}".format(volume_name))
-            if not os.path.isfile("{}.sha256".format(f)):
-                print("Checksum file not found for volume {}".format(volume_name))
-                sys.exit(1)
-            os.system("sha256sum -c {}.sha256".format(os.path.join(backup_dir, volume_name))) or sys.exit(1)
+    checked = os.system("cd {} && sha256sum -c checksums.sha256".format(backup_dir))
+    if checked != 0:
+        print("Checksums do not match")
+        sys.exit(1)
 
 def get_all_volumes():
     volumes = client.volumes.list()
@@ -133,8 +129,8 @@ def main():
         exit(1)
 
     if args.restore:
-        restore_volumes(backup_dir)
         verify_backup_checksums(backup_dir)
+        restore_volumes(backup_dir)
     else:
         backup_volumes(volumes, backup_dir)
         generate_backup_checksums(volumes, backup_dir)
