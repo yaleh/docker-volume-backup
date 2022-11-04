@@ -17,21 +17,21 @@ pip3 install -r requirements.txt
 
 To backup a volume, run the following command:
 
-    docker-volume-backup -v <volume> -d <destination>
+    docker-volume-backup.py -v <volumes> -d <backup_dir>
 
 To backup volumes of a container, run the following command:
 
-    docker-volume-backup -c <container> -d <destination>
+    docker-volume-backup.py -c <containers> -d <backup_dir>
 
 To backup volumes of a compose, run the following command:
     
-    docker-volume-backup -m <compose> -d <destination>
+    docker-volume-backup.py -m <composes> -d <backup_dir>
 
 ### Restore
 
 To restore volume(s), run the following command:
 
-    docker-volume-backup -r -d <destination>
+    docker-volume-backup.py -r -d <backup_dir>
 
 ### Options
 
