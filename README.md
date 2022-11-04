@@ -50,7 +50,7 @@ To backup volumes and attachable networks of multiple composes, use a comma-sepa
     
 ### Restore
 
-To restore volume(s), run the following command:
+To restore volume(s) and network(s), run the following command:
 
     docker-volume-backup.py -r -d <backup_dir>
 
@@ -62,10 +62,11 @@ To restore volume(s), run the following command:
     -m, --composes <composes>        Composes to backup, separated by comma
     -d, --destination <destination>  Destination to backup to
     --all-volumes                    Backup all volumes
+    --all-networks                   Backup all attachable networks
     --all-containers                 Backup volumes of all containers
     --all-composes                   Backup volumes of all composes
-    -nv, --no-volumes                Do not backup volumes
-    -nn, --no-networks               Do not backup networks
+    -nv, --no-volumes                Do not backup/restore volumes
+    -nn, --no-networks               Do not backup/restore networks
     -r, --restore                    Restore from backup
     -l, --list                       List volumes only, don't backup
     -h, --help                       Display help for command
