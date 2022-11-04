@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import datetime
 import os
 import sys
 import docker
@@ -71,6 +72,22 @@ def generate_backup_checksums(volumes, backup_dir):
         files.append(os.path.join(backup_dir, "{}.tar.gz".format(v.name)))
     os.system("sha256sum {} > {}".format(" ".join(files), os.path.join(backup_dir, "checksums.sha256")))
 
+def generate_backup_report(volumes, backup_dir):
+    report = []
+    for v in volumes:
+        report.append("{}: {} {}".format(
+                                            v.name,
+                                            os.path.join(backup_dir, "{}.tar.gz".format(v.name)), 
+                                            os.path.getsize(os.path.join(backup_dir, "{}.tar.gz".format(v.name)))
+                                        ))
+
+    with open(os.path.join(backup_dir, "backup_report.txt"), "w") as f:
+        f.write("Docker Volume Backup\n")
+        f.write("{}\n".format(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")))
+        f.write("{}\n\n".format("=" * 20))
+        f.write("\n\n".join(report))
+        f.write("\n")
+
 def verify_backup_checksums(backup_dir):
     checked = os.system("cd {} && sha256sum -c checksums.sha256".format(backup_dir))
     if checked != 0:
@@ -134,6 +151,7 @@ def main():
     else:
         backup_volumes(volumes, backup_dir)
         generate_backup_checksums(volumes, backup_dir)
+        generate_backup_report(volumes, backup_dir)
         
 if __name__ == '__main__':
     main()
