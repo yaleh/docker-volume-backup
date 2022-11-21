@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import datetime
+import json
 import os
 import sys
 import docker
@@ -84,12 +85,13 @@ def restore_networks(backup_dir):
     for f in os.listdir(backup_dir):
         if f.endswith(".json"):
             network_name = f.replace(".json", "")
-            print("Restoring network {}".format(network_name))
             network_json = os.path.join(backup_dir, f)
             network_specs = json.load(open(network_json))
-            if network_specs['Driver'] == 'bridge' and network_specs['Attachable']:
-                os.system("docker network create --driver bridge --attachable {}".format(network_name))
-                os.system("docker network create --driver bridge --subnet {} --gateway {} {}".format(network_specs['IPAM']['Config'][0]['Subnet'], network_specs['IPAM']['Config'][0]['Gateway'], network_name))
+
+            if network_specs[0]['Attachable'] and network_specs[0]['Driver'] == 'bridge':
+                # restore network
+                print("Restoring network {}".format(network_name))
+                os.system("docker network create --driver bridge --attachable --subnet {} --gateway {} {}".format(network_specs[0]['IPAM']['Config'][0]['Subnet'], network_specs[0]['IPAM']['Config'][0]['Gateway'], network_specs[0]['Name']))
 
 def print_volumes(volumes):
     print("\nVolumes:\n")
@@ -116,8 +118,10 @@ def restore_volumes(backup_dir):
 def generate_backup_checksums(volumes, backup_dir):
     files = []
     for v in volumes:
-        files.append(os.path.join(backup_dir, "{}.tar.gz".format(v.name)))
-    os.system("sha256sum {} > {}".format(" ".join(files), os.path.join(backup_dir, "checksums.sha256")))
+        files.append("{}.tar.gz".format(v.name))
+
+    # generate checksums and remove the path prefix
+    os.system("cd {} && sha256sum {} > checksums.sha256".format(backup_dir, " ".join(files)))
 
 def generate_backup_report(volumes, networks, backup_dir):
     volume_report = []
